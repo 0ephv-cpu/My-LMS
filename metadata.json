@@ -1,0 +1,6 @@
+{
+  "name": "LMS Prototype",
+  "description": "A customized Learning Management System prototype featuring shared courses, manual task creation, priority assignment dashboard, student private chat, and official teacher inquiry channels.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

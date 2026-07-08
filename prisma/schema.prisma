@@ -1,0 +1,106 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String       @id
+  name        String
+  email       String       @unique
+  role        String       // "STUDENT" or "TEACHER"
+  enrollments Enrollment[]
+  contacts    Contact[]
+  assignments Assignment[] // manual custom assignments created by this student
+}
+
+model Course {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique
+  name           String
+  description    String?
+  syllabusUrl    String?
+  classroom      String?
+  teacherContact String?
+  teacherId      String?
+  enrollments    Enrollment[]
+  assignments    Assignment[]
+  chatMessages   ChatMessage[]
+  contacts       Contact[]
+  materials      LectureMaterial[]
+}
+
+model Enrollment {
+  id       Int    @id @default(autoincrement())
+  userId   String
+  courseId Int
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Assignment {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  courseId    Int
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  isManual    Boolean  @default(false)
+  userId      String?  // Nullable for official teacher assignments, set for student manual assignments
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  priority    String   // "HIGH", "MEDIUM", "LOW"
+  deadline    DateTime
+  fileUrl     String?  // Attachment file/link URL
+  fileName    String?  // Display name of the file
+}
+
+model AssignmentStatus {
+  id           Int      @id @default(autoincrement())
+  assignmentId Int
+  userId       String
+  isCompleted  Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+
+  @@unique([assignmentId, userId])
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId    String
+  userName  String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName  String
+  subject   String
+  message   String
+  reply     String?
+  createdAt DateTime @default(now())
+}
+
+model LectureMaterial {
+  id          Int      @id @default(autoincrement())
+  courseId    Int
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  fileUrl     String?
+  fileName    String?  // Display name of the uploaded file
+  week        Int
+  teacherName String?  // Add optional field for per-session guest teacher
+  createdAt   DateTime @default(now())
+}
+
