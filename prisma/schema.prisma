@@ -26,6 +26,12 @@ model Course {
   classroom      String?
   teacherContact String?
   teacherId      String?
+  creatorId      String?      // ID of the student who manually created this course
+  isOfficial     Boolean      @default(true) // Distinguish teacher-created from student-created
+  dayOfWeek      String?      // "月", "火", "水", "木", "金", "土"
+  period         Int?         // 1, 2, 3, 4, 5, 6, 7
+  color          String?      // Theme color of the course (e.g. HEX code or Tailwind color class)
+  teacherName    String?      // Teacher name for searching
   enrollments    Enrollment[]
   assignments    Assignment[]
   chatMessages   ChatMessage[]
@@ -56,14 +62,20 @@ model Assignment {
   deadline    DateTime
   fileUrl     String?  // Attachment file/link URL
   fileName    String?  // Display name of the file
+  week        Int      @default(1)
 }
 
 model AssignmentStatus {
-  id           Int      @id @default(autoincrement())
-  assignmentId Int
-  userId       String
-  isCompleted  Boolean  @default(false)
-  updatedAt    DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  assignmentId       Int
+  userId             String
+  isCompleted        Boolean  @default(false)
+  submissionComment  String?
+  submissionFileUrl  String?
+  submissionFileName String?
+  teacherComment     String?
+  submittedAt        DateTime?
+  updatedAt          DateTime @updatedAt
 
   @@unique([assignmentId, userId])
 }

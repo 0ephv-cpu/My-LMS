@@ -23,197 +23,358 @@ app.use("/uploads", express.static(uploadsDir));
 
 // Seeding function
 async function seedDatabase() {
-  const userCount = await prisma.user.count();
-  if (userCount === 0) {
-    console.log("Seeding database with default mock data...");
+  console.log("Resetting database and seeding with fresh default mock data...");
 
-    // Create Users
-    const alice = await prisma.user.create({
-      data: {
-        id: "student-1",
-        name: "アリス (学生)",
-        email: "alice@example.com",
-        role: "STUDENT",
+  // Delete existing records to ensure fresh state
+  try {
+    await prisma.lectureMaterial.deleteMany({});
+    await prisma.chatMessage.deleteMany({});
+    await prisma.contact.deleteMany({});
+    await prisma.assignmentStatus.deleteMany({});
+    await prisma.assignment.deleteMany({});
+    await prisma.enrollment.deleteMany({});
+    await prisma.course.deleteMany({});
+    await prisma.user.deleteMany({});
+  } catch (err) {
+    console.error("Error clearing database tables:", err);
+  }
+
+  // Create Users
+  const alice = await prisma.user.create({
+    data: {
+      id: "student-1",
+      name: "アリス (学生)",
+      email: "alice@example.com",
+      role: "STUDENT",
+    },
+  });
+
+  const bob = await prisma.user.create({
+    data: {
+      id: "student-2",
+      name: "ボブ (学生)",
+      email: "bob@example.com",
+      role: "STUDENT",
+    },
+  });
+
+  const teacher = await prisma.user.create({
+    data: {
+      id: "teacher-1",
+      name: "佐藤教授 (教員)",
+      email: "sato@example.com",
+      role: "TEACHER",
+    },
+  });
+
+  const teacher2 = await prisma.user.create({
+    data: {
+      id: "teacher-2",
+      name: "山田教授 (教員)",
+      email: "yamada@example.com",
+      role: "TEACHER",
+    },
+  });
+
+  // Create Courses
+  const cognitive = await prisma.course.create({
+    data: {
+      code: "COGNITIVE101",
+      name: "認知科学基礎論",
+      description: "人間の知の仕組みを、心理学、脳科学、人工知能の多角的なアプローチから探求します。認知バイアス、記憶、言語獲得、意思決定などの認知機能をモデル化して理解します。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/cognitive101",
+      classroom: "三田キャンパス 511教室",
+      teacherContact: "sato@example.com (佐藤研究室)",
+      teacherId: teacher.id,
+      isOfficial: true,
+      dayOfWeek: "月",
+      period: 1,
+      color: "#9333ea", // Purple
+      teacherName: "佐藤教授",
+    },
+  });
+
+  const econ = await prisma.course.create({
+    data: {
+      code: "ECONOMICS202",
+      name: "ミクロ経済学中級",
+      description: "市場における価格形成のメカニズムや企業・消費者の最適化行動、ゲーム理論の基礎を数理的に分析します。市場の失敗や外部性、情報の非対称性への理解を深めます。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/econ202",
+      classroom: "日吉キャンパス J411教室",
+      teacherContact: "sato@example.com (佐藤研究室)",
+      teacherId: teacher.id,
+      isOfficial: true,
+      dayOfWeek: "水",
+      period: 3,
+      color: "#3b82f6", // Blue
+      teacherName: "佐藤教授",
+    },
+  });
+
+  const media = await prisma.course.create({
+    data: {
+      code: "MEDIA301",
+      name: "メディア・コミュニケーション論",
+      description: "マスメディアからソーシャルメディアに至るメディア環境の変遷と、それが個人の心理、社会構造、世論形成、文化価値観に与える影響を多角的なメディア理論から紐解きます。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/media301",
+      classroom: "SFC アルファ館 201教室",
+      teacherContact: "yamada@example.com (山田研究室)",
+      teacherId: teacher2.id,
+      isOfficial: true,
+      dayOfWeek: "金",
+      period: 2,
+      color: "#ef4444", // Red
+      teacherName: "山田教授",
+    },
+  });
+
+  const aiSocial = await prisma.course.create({
+    data: {
+      code: "AI401",
+      name: "人工知能と社会構造",
+      description: "生成AIやディープラーニングなどの技術革新が、著作権、労働、法制度、倫理観に与える構造的な変化を考察します。技術的な限界をふまえた、望ましいAIガバナンスを議論します。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/ai401",
+      classroom: "三田キャンパス 421教室",
+      teacherContact: "yamada@example.com (山田研究室)",
+      teacherId: teacher2.id,
+      isOfficial: true,
+      dayOfWeek: "火",
+      period: 2,
+      color: "#10b981", // Green
+      teacherName: "山田教授",
+    },
+  });
+
+  const english = await prisma.course.create({
+    data: {
+      code: "ENGL401",
+      name: "学術英語ライティング",
+      description: "国際的な研究論文の執筆に必要なロジカルな文章構成力、適切なアカデミック語彙の選択、パラグラフの展開手法、および正確な引用形式のルールについて実践的に指導します。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/engl401",
+      classroom: "日吉キャンパス D201教室",
+      teacherContact: "yamada@example.com (山田研究室)",
+      teacherId: teacher2.id,
+      isOfficial: true,
+      dayOfWeek: "木",
+      period: 4,
+      color: "#f59e0b", // Amber
+      teacherName: "山田教授",
+    },
+  });
+
+  const math = await prisma.course.create({
+    data: {
+      code: "MATH101",
+      name: "線形代数学基礎",
+      description: "ベクトル空間、線形写像、行列式、固有値・固有ベクトルなど、現代科学技術の基盤となる線形代数の基本概念とその応用について体系的に学びます。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/math101",
+      classroom: "矢上キャンパス 12棟101教室",
+      teacherContact: "sato@example.com (佐藤研究室)",
+      teacherId: teacher.id,
+      isOfficial: true,
+      dayOfWeek: "火",
+      period: 3,
+      color: "#06b6d4", // Cyan
+      teacherName: "佐藤教授",
+    },
+  });
+
+  const cs = await prisma.course.create({
+    data: {
+      code: "CS201",
+      name: "データ構造とアルゴリズム",
+      description: "計算機科学において極めて重要な配列、リスト、スタック、キュー、木構造、グラフなどのデータ構造と、ソート、探索、動的計画法などの主要なアルゴリズムの設計・解析手法を習得します。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/cs201",
+      classroom: "矢上キャンパス 14棟201教室",
+      teacherContact: "yamada@example.com (山田研究室)",
+      teacherId: teacher2.id,
+      isOfficial: true,
+      dayOfWeek: "木",
+      period: 2,
+      color: "#f43f5e", // Rose
+      teacherName: "山田教授",
+    },
+  });
+
+  // Enrollments
+  await prisma.enrollment.createMany({
+    data: [
+      { userId: alice.id, courseId: cognitive.id },
+      { userId: alice.id, courseId: econ.id },
+      { userId: alice.id, courseId: aiSocial.id },
+      { userId: alice.id, courseId: math.id },
+      { userId: bob.id, courseId: cognitive.id },
+      { userId: bob.id, courseId: media.id },
+      { userId: bob.id, courseId: english.id },
+      { userId: bob.id, courseId: cs.id },
+    ],
+  });
+
+  // Assignments
+  const now = new Date();
+
+  await prisma.assignment.createMany({
+    data: [
+      {
+        title: "認知バイアスに関するミニレポート",
+        description: "日常で見られる認知バイアス（確証バイアス、フレーミング効果など）の事例を1つ挙げ、その心理学的背景をA4用紙1枚程度で要約・考察しなさい。",
+        courseId: cognitive.id,
+        isManual: false,
+        priority: "MEDIUM",
+        deadline: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
       },
-    });
-
-    const bob = await prisma.user.create({
-      data: {
-        id: "student-2",
-        name: "ボブ (学生)",
-        email: "bob@example.com",
-        role: "STUDENT",
+      {
+        title: "第3回講義の確認クイズ",
+        description: "コグニティブAIに関する第3回特別講義スライドを復習し、期限までにLMS上の確認クイズ（全5問）をすべて完了させてください。",
+        courseId: cognitive.id,
+        isManual: false,
+        priority: "LOW",
+        deadline: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
       },
-    });
-
-    const teacher = await prisma.user.create({
-      data: {
-        id: "teacher-1",
-        name: "佐藤教授 (教員)",
-        email: "sato@example.com",
-        role: "TEACHER",
+      {
+        title: "市場の失敗と外部性に関する計算問題",
+        description: "教科書第5章の練習問題 1〜5を解き、途中計算とグラフ、および厚生評価のプロセスを詳細に記述したPDFファイルを提出してください。",
+        courseId: econ.id,
+        isManual: false,
+        priority: "HIGH",
+        deadline: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
       },
-    });
-
-    // Create Courses
-    const cs101 = await prisma.course.create({
-      data: {
-        code: "CS101",
-        name: "コンピュータサイエンス入門",
-        description: "プログラミングの基礎とアルゴリズムについて学びます。",
-        syllabusUrl: "https://syllabus.univ.ac.jp/cs101",
-        classroom: "4号館 401教室",
-        teacherContact: "sato@example.com (佐藤研究室)",
-        teacherId: teacher.id,
+      {
+        title: "ソーシャルメディアが世論に与える影響の分析",
+        description: "特定のエコーチェンバー現象またはフェイクニュースの拡散事例を調べ、その伝播モデルと社会へのインパクト、および対策案を構造的にレポートにまとめてください。",
+        courseId: media.id,
+        isManual: false,
+        priority: "HIGH",
+        deadline: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
       },
-    });
-
-    const math201 = await prisma.course.create({
-      data: {
-        code: "MATH201",
-        name: "解析学 II",
-        description: "微分積分の応用と多変数関数の微分積分を扱います。",
-        syllabusUrl: "https://syllabus.univ.ac.jp/math201",
-        classroom: "1号館 102教室",
-        teacherContact: "sato@example.com (佐藤研究室)",
-        teacherId: teacher.id,
+      {
+        title: "生成AIが著作権とクリエイティブ業界に与える影響",
+        description: "米国または日本国内の具体的な係争例やガイドラインを参照しつつ、AIガバナンスと表現の自由の衝突に関する立場をグループでまとめてスライドを用意すること。",
+        courseId: aiSocial.id,
+        isManual: false,
+        priority: "MEDIUM",
+        deadline: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
       },
-    });
-
-    const literature301 = await prisma.course.create({
-      data: {
-        code: "LIT301",
-        name: "現代日本文学論",
-        description: "夏目漱石から村上春樹にいたる現代文学の潮流を探求します。",
-        syllabusUrl: "https://syllabus.univ.ac.jp/lit301",
-        classroom: "2号館 204教室",
-        teacherContact: "yamada@example.com (山田研究室)",
-        teacherId: "teacher-2",
+      {
+        title: "行列の対角化と固有値問題の演習",
+        description: "固有値・固有ベクトルの定義に基づき、3次正方行列の対角化可能性の判定と実際の対角化計算を行い、その幾何学的意味を説明しなさい。配布された演習プリントを解いてPDFでアップロードしてください。",
+        courseId: math.id,
+        isManual: false,
+        priority: "MEDIUM",
+        deadline: new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000), // 6 days from now
       },
-    });
+      {
+        title: "ハッシュテーブルの実装と性能比較",
+        description: "チェイン法とオープンアドレス法を用いたハッシュテーブルをプログラム言語（Python、C、Java、TypeScriptなど任意）で実装し、衝突（衝突数と探索効率）に関する実測データを比較分析したレポートを提出しなさい。",
+        courseId: cs.id,
+        isManual: false,
+        priority: "HIGH",
+        deadline: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000), // 8 days from now
+      },
+      // Alice manual assignment
+      {
+        title: "アリスのフレーミング効果文献調査",
+        description: "カーネマンとトベルスキーの古典論文「The Framing of Decisions」を精読し、主要な論点を読書記録ノートにメモする。",
+        courseId: cognitive.id,
+        isManual: true,
+        userId: alice.id,
+        priority: "HIGH",
+        deadline: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+      },
+    ],
+  });
 
-    // Enrollments
-    await prisma.enrollment.createMany({
-      data: [
-        { userId: alice.id, courseId: cs101.id },
-        { userId: alice.id, courseId: math201.id },
-        { userId: bob.id, courseId: cs101.id },
-        { userId: bob.id, courseId: literature301.id },
-      ],
-    });
-
-    // Assignments
-    const now = new Date();
-
-    await prisma.assignment.createMany({
-      data: [
-        {
-          title: "中間プログラミング課題",
-          description: "配列とループを用いたデータ集計プログラムの作成。",
-          courseId: cs101.id,
-          isManual: false,
-          priority: "HIGH",
-          deadline: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-        },
-        {
-          title: "確認小テスト 2",
-          description: "第4回の講義スライドを復習して解答してください。",
-          courseId: cs101.id,
-          isManual: false,
-          priority: "MEDIUM",
-          deadline: new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
-        },
-        {
-          title: "微分積分課題 3",
-          description: "第5章の練習問題 1〜5を解いてPDFで提出。",
-          courseId: math201.id,
-          isManual: false,
-          priority: "LOW",
-          deadline: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-        },
-        // Alice manual assignment
-        {
-          title: "アリスの自主学習用タスク",
-          description: "参考書「よくわかるアルゴリズム」第2章を読む。",
-          courseId: cs101.id,
-          isManual: true,
-          userId: alice.id,
-          priority: "HIGH",
-          deadline: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-        },
-      ],
-    });
-
-    // Student chat message
-    await prisma.chatMessage.createMany({
-      data: [
-        {
-          courseId: cs101.id,
-          userId: alice.id,
-          userName: "アリス (学生)",
-          message: "プログラミング課題の問2、どうやって解いた？",
-        },
-        {
-          courseId: cs101.id,
-          userId: bob.id,
-          userName: "ボブ (学生)",
-          message: "ループを使って配列の要素を合計したよ！",
-        },
-      ],
-    });
-
-    // Contact teacher
-    await prisma.contact.create({
-      data: {
-        courseId: cs101.id,
+  // Student chat message
+  await prisma.chatMessage.createMany({
+    data: [
+      {
+        courseId: cognitive.id,
         userId: alice.id,
         userName: "アリス (学生)",
-        subject: "体調不良による講義欠席の相談",
-        message: "明日の講義を風邪のため欠席させていただきます。スライド資料はLMSから閲覧可能でしょうか。",
-        reply: "お大事に。講義資料はすべてLMSのシラバスリンクからダウンロードできますので確認してください。",
+        message: "認知バイアスのレポート、みんなテーマ何にする？",
       },
-    });
+      {
+        courseId: cognitive.id,
+        userId: bob.id,
+        userName: "ボブ (学生)",
+        message: "僕は日常の意思決定で起きる「確証バイアス」について書く予定だよ！ニュースの見方とかに関連づけて。",
+      },
+      {
+        courseId: cognitive.id,
+        userId: alice.id,
+        userName: "アリス (学生)",
+        message: "面白そう！私は「フレーミング効果」で、質問の表現によってアンケート結果がどう変わるか調べようかな。",
+      },
+    ],
+  });
 
-    // Seeding lecture materials
-    await prisma.lectureMaterial.createMany({
-      data: [
-        {
-          courseId: cs101.id,
-          title: "第1回 イントロダクション＆環境構築",
-          description: "講義の進め方と、Node.js / VS Code のセットアップ手順についてのスライドです。",
-          fileUrl: "https://example.com/slides/cs101-week1.pdf",
-          week: 1,
-          teacherName: "佐藤 裕二 教授",
-        },
-        {
-          courseId: cs101.id,
-          title: "第2回 基本的なデータ型と変数",
-          description: "JavaScript/TypeScript における変数宣言、数値、文字列、真偽値の基礎講義資料。",
-          fileUrl: "https://example.com/slides/cs101-week2.pdf",
-          week: 2,
-          teacherName: "佐藤 裕二 教授",
-        },
-        {
-          courseId: cs101.id,
-          title: "第3回 [特別講義] Webフロントエンド最前線",
-          description: "ゲスト講師を招き、現代のSPA開発手法とフレームワーク（React, Vite）の変遷を学びます。",
-          fileUrl: "https://example.com/slides/cs101-week3-guest.pdf",
-          week: 3,
-          teacherName: "鈴木 健一 特任教授 (ゲスト講師)",
-        },
-        {
-          courseId: math201.id,
-          title: "第1回 多変数関数の極限",
-          description: "2変数関数の極限と連続性の定義、例題の解説資料です。",
-          fileUrl: "https://example.com/slides/math201-week1.pdf",
-          week: 1,
-          teacherName: "高橋 直樹 准教授",
-        }
-      ]
-    });
+  // Contact teacher
+  await prisma.contact.create({
+    data: {
+      courseId: cognitive.id,
+      userId: alice.id,
+      userName: "アリス (学生)",
+      subject: "体調不良による講義欠席の相談",
+      message: "明日の講義を風邪のため欠席させていただきます。講義スライドはLMSから閲覧可能でしょうか。",
+      reply: "お大事にしてください。講義スライドはすべて「授業資料・講義スライド」タブにアップロードしていますので、第1回〜第3回を確認して自習に役立ててください。確認クイズも忘れずに行ってくださいね。",
+    },
+  });
 
-    console.log("Database seeded successfully!");
-  }
+  // Seeding lecture materials
+  await prisma.lectureMaterial.createMany({
+    data: [
+      {
+        courseId: cognitive.id,
+        title: "第1回 認知科学の歴史とアプローチ",
+        description: "講義全体の進め方と、行動主義から認知心理学への移行期における情報処理パラダイムの台頭について学ぶスライドです。",
+        fileUrl: "https://example.com/slides/cognitive-week1.pdf",
+        week: 1,
+        teacherName: "佐藤 裕二 教授",
+      },
+      {
+        courseId: cognitive.id,
+        title: "第2回 感覚・知覚と認知のメカニズム",
+        description: "視覚・聴覚情報の感覚器から脳への伝達と、人間の認知システムが持つ「ボトムアップ処理」と「トップダウン処理」の相互作用についての講義レジュメ。",
+        fileUrl: "https://example.com/slides/cognitive-week2.pdf",
+        week: 2,
+        teacherName: "佐藤 裕二 教授",
+      },
+      {
+        courseId: cognitive.id,
+        title: "第3回 [特別講義] コグニティブAI最前線",
+        description: "ゲスト講師を招き、LLM（大規模言語モデル）の推論プロセスと人間の認知科学モデルとの類似性、および今後の展開について議論します。",
+        fileUrl: "https://example.com/slides/cognitive-week3-guest.pdf",
+        week: 3,
+        teacherName: "鈴木 健一 特任教授 (ゲスト講師)",
+      },
+      {
+        courseId: econ.id,
+        title: "第1回 消費者行動と効用最大化",
+        description: "無差別曲線と予算線を用いて、消費者の合理的な選択と限界代替率（MRS）の概念を視覚的かつ数理的に分析します。",
+        fileUrl: "https://example.com/slides/econ-week1.pdf",
+        week: 1,
+        teacherName: "佐藤 裕二 教授",
+      },
+      {
+        courseId: math.id,
+        title: "第1回 行列と行列式の基本性質",
+        description: "連立一次方程式の掃き出し法による解法と、行列式の性質（多線形性・交代性）について理解を深める講義資料です。",
+        fileUrl: "https://example.com/slides/math-week1.pdf",
+        week: 1,
+        teacherName: "佐藤 裕二 教授",
+      },
+      {
+        courseId: cs.id,
+        title: "第1回 アルゴリズムの計算量とO記法",
+        description: "最悪時間計算量、平均時間計算量の概念と、アルゴリズムの効率性を測るためのランダウの記号（Big-O）の数理的定義と使用方法について解説します。",
+        fileUrl: "https://example.com/slides/cs-week1.pdf",
+        week: 1,
+        teacherName: "山田 教授",
+      }
+    ]
+  });
+
+  console.log("Database seeded successfully with rich academic examples!");
 }
 
 async function seedMaterialsForExisting() {
@@ -221,49 +382,79 @@ async function seedMaterialsForExisting() {
     const materialCount = await prisma.lectureMaterial.count();
     if (materialCount === 0) {
       console.log("Seeding existing database with lecture materials...");
-      const cs101 = await prisma.course.findUnique({ where: { code: "CS101" } });
-      const math201 = await prisma.course.findUnique({ where: { code: "MATH201" } });
+      const cognitive = await prisma.course.findUnique({ where: { code: "COGNITIVE101" } });
+      const econ = await prisma.course.findUnique({ where: { code: "ECONOMICS202" } });
+      const math = await prisma.course.findUnique({ where: { code: "MATH101" } });
+      const cs = await prisma.course.findUnique({ where: { code: "CS201" } });
       
-      if (cs101) {
+      if (cognitive) {
         await prisma.lectureMaterial.createMany({
           data: [
             {
-              courseId: cs101.id,
-              title: "第1回 イントロダクション＆環境構築",
-              description: "講義の進め方と、Node.js / VS Code のセットアップ手順についてのスライドです。",
-              fileUrl: "https://example.com/slides/cs101-week1.pdf",
+              courseId: cognitive.id,
+              title: "第1回 認知科学の歴史とアプローチ",
+              description: "講義全体の進め方と、行動主義から認知心理学への移行期における情報処理パラダイムの台頭について学ぶスライドです。",
+              fileUrl: "https://example.com/slides/cognitive-week1.pdf",
               week: 1,
               teacherName: "佐藤 裕二 教授",
             },
             {
-              courseId: cs101.id,
-              title: "第2回 基本的なデータ型と変数",
-              description: "JavaScript/TypeScript における変数宣言、数値、文字列、真偽値の基礎講義資料。",
-              fileUrl: "https://example.com/slides/cs101-week2.pdf",
+              courseId: cognitive.id,
+              title: "第2回 感覚・知覚と認知のメカニズム",
+              description: "視覚・聴覚情報の感覚器から脳への伝達と、人間の認知システムが持つ「ボトムアップ処理」と「トップダウン処理」の相互作用についての講義レジュメ。",
+              fileUrl: "https://example.com/slides/cognitive-week2.pdf",
               week: 2,
               teacherName: "佐藤 裕二 教授",
             },
             {
-              courseId: cs101.id,
-              title: "第3回 [特別講義] Webフロントエンド最前線",
-              description: "ゲスト講師を招き、現代のSPA開発手法とフレームワーク（React, Vite）の変遷を学びます。",
-              fileUrl: "https://example.com/slides/cs101-week3-guest.pdf",
+              courseId: cognitive.id,
+              title: "第3回 [特別講義] コグニティブAI最前線",
+              description: "ゲスト講師を招き、LLM（大規模言語モデル）の推論プロセスと人間の認知科学モデルとの類似性、および今後の展開について議論します。",
+              fileUrl: "https://example.com/slides/cognitive-week3-guest.pdf",
               week: 3,
               teacherName: "鈴木 健一 特任教授 (ゲスト講師)",
             }
           ]
         });
       }
-      if (math201) {
+      if (econ) {
         await prisma.lectureMaterial.createMany({
           data: [
             {
-              courseId: math201.id,
-              title: "第1回 多変数関数の極限",
-              description: "2変数関数の極限と連続性の定義、例題の解説資料です。",
-              fileUrl: "https://example.com/slides/math201-week1.pdf",
+              courseId: econ.id,
+              title: "第1回 消費者行動と効用最大化",
+              description: "無差別曲線と予算線を用いて、消費者の合理的な選択と限界代替率（MRS）の概念を視覚的かつ数理的に分析します。",
+              fileUrl: "https://example.com/slides/econ-week1.pdf",
               week: 1,
-              teacherName: "高橋 直樹 准教授",
+              teacherName: "佐藤 裕二 教授",
+            }
+          ]
+        });
+      }
+      if (math) {
+        await prisma.lectureMaterial.createMany({
+          data: [
+            {
+              courseId: math.id,
+              title: "第1回 行列と行列式の基本性質",
+              description: "連立一次方程式の掃き出し法による解法と、行列式の性質（多線形性・交代性）について理解を深める講義資料です。",
+              fileUrl: "https://example.com/slides/math-week1.pdf",
+              week: 1,
+              teacherName: "佐藤 裕二 教授",
+            }
+          ]
+        });
+      }
+      if (cs) {
+        await prisma.lectureMaterial.createMany({
+          data: [
+            {
+              courseId: cs.id,
+              title: "第1回 アルゴリズムの計算量とO記法",
+              description: "最悪時間計算量、平均時間計算量の概念と、アルゴリズムの効率性を測るためのランダウの記号（Big-O）の数理的定義と使用方法について解説します。",
+              fileUrl: "https://example.com/slides/cs-week1.pdf",
+              week: 1,
+              teacherName: "山田 教授",
             }
           ]
         });
@@ -274,13 +465,6 @@ async function seedMaterialsForExisting() {
     console.error("Failed to seed materials for existing database:", err);
   }
 }
-
-// Ensure database is seeded
-seedDatabase()
-  .then(() => seedMaterialsForExisting())
-  .catch((e) => {
-    console.error("Failed to seed database:", e);
-  });
 
 // Helper to get current user based on x-user-id header
 async function getCurrentUser(req: express.Request) {
@@ -374,11 +558,41 @@ app.get("/api/courses", async (req, res) => {
 app.post("/api/courses", async (req, res) => {
   try {
     const user = await getCurrentUser(req);
-    const { code, name, description, syllabusUrl, classroom, teacherContact } = req.body;
+    const { 
+      code, 
+      name, 
+      description, 
+      syllabusUrl, 
+      classroom, 
+      teacherContact,
+      dayOfWeek,
+      period,
+      color,
+      teacherName
+    } = req.body;
 
     if (!code || !name) {
-      return res.status(400).json({ error: "Code and Name are required" });
+      return res.status(400).json({ error: "授業コードと授業名は必須です。" });
     }
+
+    if (!dayOfWeek || !period) {
+      return res.status(400).json({ error: "曜日と時限は必須です。" });
+    }
+
+    const defaultColors = [
+      "#4f46e5", // Indigo
+      "#059669", // Emerald
+      "#db2777", // Pink
+      "#d97706", // Amber
+      "#2563eb", // Blue
+      "#7c3aed", // Violet
+      "#0891b2", // Cyan
+      "#0d9488", // Teal
+      "#dc2626", // Red
+      "#4b5563"  // Gray
+    ];
+    const finalColor = color || defaultColors[Math.floor(Math.random() * defaultColors.length)];
+    const isOfficial = user ? user.role === "TEACHER" : true;
 
     const course = await prisma.course.create({
       data: {
@@ -388,7 +602,13 @@ app.post("/api/courses", async (req, res) => {
         syllabusUrl,
         classroom,
         teacherContact: teacherContact || (user && user.role === "TEACHER" ? `${user.email} (${user.name})` : undefined),
-        teacherId: user && user.role === "TEACHER" ? user.id : "teacher-1",
+        teacherId: user && user.role === "TEACHER" ? user.id : null,
+        creatorId: user ? user.id : null,
+        isOfficial,
+        dayOfWeek: dayOfWeek || null,
+        period: period ? parseInt(period) : null,
+        color: finalColor,
+        teacherName: teacherName || (user && user.role === "TEACHER" ? user.name.replace(" (教員)", "") : null),
       },
     });
 
@@ -407,7 +627,8 @@ app.post("/api/courses", async (req, res) => {
     if (error.code === "P2002") {
       res.status(400).json({ error: "その授業コード (Course Code) は既に登録されています" });
     } else {
-      res.status(500).json({ error: "Failed to create course" });
+      console.error("Create course error:", error);
+      res.status(500).json({ error: "授業の作成に失敗しました。" });
     }
   }
 });
@@ -492,6 +713,7 @@ app.get("/api/dashboard", async (req, res) => {
           select: {
             name: true,
             code: true,
+            color: true,
           },
         },
       },
@@ -505,13 +727,21 @@ app.get("/api/dashboard", async (req, res) => {
       },
     });
 
-    const statusMap = new Map(statuses.map((s) => [s.assignmentId, s.isCompleted]));
+    const statusMap = new Map(statuses.map((s) => [s.assignmentId, s]));
 
-    // Append completion status to assignments
-    const assignmentsWithStatus = assignments.map((a) => ({
-      ...a,
-      isCompleted: statusMap.get(a.id) || false,
-    }));
+    // Append completion status and submission fields to assignments
+    const assignmentsWithStatus = assignments.map((a) => {
+      const statusObj = statusMap.get(a.id);
+      return {
+        ...a,
+        isCompleted: statusObj ? statusObj.isCompleted : false,
+        submissionComment: statusObj ? statusObj.submissionComment : null,
+        submissionFileUrl: statusObj ? statusObj.submissionFileUrl : null,
+        submissionFileName: statusObj ? statusObj.submissionFileName : null,
+        teacherComment: statusObj ? statusObj.teacherComment : null,
+        submittedAt: statusObj ? statusObj.submittedAt : null,
+      };
+    });
 
     // Sort: 1. incomplete first, 2. deadline (closest first), 3. priority (HIGH -> MEDIUM -> LOW)
     const priorityWeight = { HIGH: 3, MEDIUM: 2, LOW: 1 } as Record<string, number>;
@@ -549,7 +779,7 @@ app.post("/api/assignments", async (req, res) => {
     const user = await getCurrentUser(req);
     if (!user) return res.status(401).json({ error: "Unauthorized" });
 
-    const { title, description, courseId, isManual, priority, deadline, fileUrl, fileName } = req.body;
+    const { title, description, courseId, isManual, priority, deadline, fileUrl, fileName, week } = req.body;
 
     if (!title || !courseId || !priority || !deadline) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -581,6 +811,7 @@ app.post("/api/assignments", async (req, res) => {
         deadline: new Date(deadline),
         fileUrl: fileUrl || null,
         fileName: fileName || null,
+        week: week ? parseInt(week) : 1,
       },
     });
 
@@ -588,6 +819,225 @@ app.post("/api/assignments", async (req, res) => {
   } catch (error) {
     console.error("Create assignment error:", error);
     res.status(500).json({ error: "Failed to create assignment" });
+  }
+});
+
+// PUT /api/assignments/:id - Update assignment details (description, week, attachments) (Teacher or Creator only)
+app.put("/api/assignments/:id", async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+    const assignmentId = parseInt(req.params.id);
+    const { title, description, fileUrl, fileName, priority, deadline, week } = req.body;
+
+    const assignment = await prisma.assignment.findUnique({
+      where: { id: assignmentId },
+    });
+
+    if (!assignment) {
+      return res.status(404).json({ error: "Assignment not found" });
+    }
+
+    // Access control
+    if (assignment.isManual) {
+      if (assignment.userId !== user.id) {
+        return res.status(403).json({ error: "You cannot edit this manual assignment" });
+      }
+    } else {
+      if (user.role !== "TEACHER") {
+        return res.status(403).json({ error: "Only teachers can edit official assignments" });
+      }
+    }
+
+    const updated = await prisma.assignment.update({
+      where: { id: assignmentId },
+      data: {
+        title: title !== undefined ? title : assignment.title,
+        description: description !== undefined ? description : assignment.description,
+        fileUrl: fileUrl !== undefined ? fileUrl : assignment.fileUrl,
+        fileName: fileName !== undefined ? fileName : assignment.fileName,
+        priority: priority !== undefined ? priority : assignment.priority,
+        deadline: deadline !== undefined ? new Date(deadline) : assignment.deadline,
+        week: week !== undefined ? parseInt(week) : assignment.week,
+      },
+    });
+
+    res.json(updated);
+  } catch (error) {
+    console.error("Update assignment error:", error);
+    res.status(500).json({ error: "Failed to update assignment" });
+  }
+});
+
+// POST /api/assignments/:id/submit - Submit assignment (Student comment and/or attachment)
+app.post("/api/assignments/:id/submit", async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+    const assignmentId = parseInt(req.params.id);
+    const { submissionComment, submissionFileUrl, submissionFileName } = req.body;
+
+    const statusObj = await prisma.assignmentStatus.upsert({
+      where: {
+        assignmentId_userId: {
+          assignmentId,
+          userId: user.id,
+        },
+      },
+      update: {
+        submissionComment: submissionComment || null,
+        submissionFileUrl: submissionFileUrl || null,
+        submissionFileName: submissionFileName || null,
+        isCompleted: true,
+        submittedAt: new Date(),
+      },
+      create: {
+        assignmentId,
+        userId: user.id,
+        submissionComment: submissionComment || null,
+        submissionFileUrl: submissionFileUrl || null,
+        submissionFileName: submissionFileName || null,
+        isCompleted: true,
+        submittedAt: new Date(),
+      },
+    });
+
+    res.json({ success: true, status: statusObj });
+  } catch (error) {
+    console.error("Submit assignment error:", error);
+    res.status(500).json({ error: "Failed to submit assignment" });
+  }
+});
+
+// POST /api/assignments/:id/feedback - Add/update teacher feedback comment (Teacher only)
+app.post("/api/assignments/:id/feedback", async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+    if (user.role !== "TEACHER") {
+      return res.status(403).json({ error: "教員のみがフィードバックを登録できます。" });
+    }
+
+    const assignmentId = parseInt(req.params.id);
+    const { studentId, teacherComment } = req.body;
+
+    if (!studentId) {
+      return res.status(400).json({ error: "学生IDが必要です。" });
+    }
+
+    const statusObj = await prisma.assignmentStatus.upsert({
+      where: {
+        assignmentId_userId: {
+          assignmentId,
+          userId: studentId,
+        },
+      },
+      update: {
+        teacherComment: teacherComment || null,
+      },
+      create: {
+        assignmentId,
+        userId: studentId,
+        teacherComment: teacherComment || null,
+        isCompleted: false,
+      },
+    });
+
+    res.json({ success: true, status: statusObj });
+  } catch (error) {
+    console.error("Feedback error:", error);
+    res.status(500).json({ error: "Failed to save feedback" });
+  }
+});
+
+// GET /api/assignments/:id/submissions - Get submission list for an assignment (Teacher or Student)
+app.get("/api/assignments/:id/submissions", async (req, res) => {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+    const assignmentId = parseInt(req.params.id);
+
+    if (user.role === "TEACHER") {
+      const assignmentObj = await prisma.assignment.findUnique({
+        where: { id: assignmentId },
+      });
+      if (!assignmentObj) {
+        return res.status(404).json({ error: "Assignment not found" });
+      }
+
+      const enrollments = await prisma.enrollment.findMany({
+        where: { courseId: assignmentObj.courseId },
+        include: { user: true },
+      });
+
+      const students = enrollments
+        .map((e) => e.user)
+        .filter((u) => u.role === "STUDENT");
+
+      const statuses = await prisma.assignmentStatus.findMany({
+        where: { assignmentId },
+      });
+
+      const statusMap = new Map(statuses.map((s) => [s.userId, s]));
+
+      const results = students.map((s) => {
+        const sObj = statusMap.get(s.id);
+        return {
+          userId: s.id,
+          userName: s.name,
+          userEmail: s.email,
+          isCompleted: sObj ? sObj.isCompleted : false,
+          submissionComment: sObj ? sObj.submissionComment : null,
+          submissionFileUrl: sObj ? sObj.submissionFileUrl : null,
+          submissionFileName: sObj ? sObj.submissionFileName : null,
+          teacherComment: sObj ? sObj.teacherComment : null,
+          submittedAt: sObj ? sObj.submittedAt : null,
+          updatedAt: sObj ? sObj.updatedAt : null,
+        };
+      });
+
+      res.json(results);
+    } else {
+      const statusObj = await prisma.assignmentStatus.findUnique({
+        where: {
+          assignmentId_userId: {
+            assignmentId,
+            userId: user.id,
+          },
+        },
+      });
+
+      res.json(statusObj ? [{
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        isCompleted: statusObj.isCompleted,
+        submissionComment: statusObj.submissionComment,
+        submissionFileUrl: statusObj.submissionFileUrl,
+        submissionFileName: statusObj.submissionFileName,
+        teacherComment: statusObj.teacherComment,
+        submittedAt: statusObj.submittedAt,
+        updatedAt: statusObj.updatedAt,
+      }] : [{
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        isCompleted: false,
+        submissionComment: null,
+        submissionFileUrl: null,
+        submissionFileName: null,
+        teacherComment: null,
+        submittedAt: null,
+        updatedAt: null,
+      }]);
+    }
+  } catch (error) {
+    console.error("Fetch submissions error:", error);
+    res.status(500).json({ error: "Failed to fetch submissions" });
   }
 });
 
@@ -901,6 +1351,18 @@ app.delete("/api/materials/:id", async (req, res) => {
 
 // Serve Vite or static files
 async function startServer() {
+  // Check if users exist. If not, seed database automatically.
+  try {
+    const userCount = await prisma.user.count();
+    if (userCount === 0) {
+      console.log("Database is empty. Seeding database...");
+      await seedDatabase();
+      await seedMaterialsForExisting();
+    }
+  } catch (err) {
+    console.error("Failed to check/seed database on startup:", err);
+  }
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
