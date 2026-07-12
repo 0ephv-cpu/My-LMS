@@ -920,6 +920,7 @@ export default function App() {
                           id={`enrolled-course-${course.id}`}
                           onClick={() => {
                             setSelectedCourse(course);
+                            setViewingAssignment(null);
                             setActiveTab("course-detail");
                             setCourseDetailTab("materials");
                           }}
@@ -1049,7 +1050,14 @@ export default function App() {
                           <div
                             key={assignment.id}
                             id={`official-assignment-item-${assignment.id}`}
-                            className={`p-3.5 rounded-xl border border-l-[6px] transition-all flex flex-col gap-2 hover:scale-[1.01] ${
+                            onClick={() => {
+                              const courseObj = enrolledCoursesList.find(c => c.id === assignment.courseId) || courses.find(c => c.id === assignment.courseId) || assignment.course;
+                              setSelectedCourse(courseObj);
+                              setViewingAssignment(assignment);
+                              fetchSubmissions(assignment.id);
+                              setActiveTab("course-detail");
+                            }}
+                            className={`p-3.5 rounded-xl border border-l-[6px] transition-all flex flex-col gap-2 hover:scale-[1.01] cursor-pointer hover:shadow-md ${
                               assignment.isCompleted
                                 ? "opacity-65 hover:opacity-80 bg-slate-50/40"
                                 : "hover:shadow-xs"
@@ -1070,7 +1078,10 @@ export default function App() {
                           >
                             <div className="flex gap-2.5 items-start">
                               <button
-                                onClick={() => handleToggleAssignment(assignment.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleAssignment(assignment.id);
+                                }}
                                 className="mt-0.5 focus:outline-none cursor-pointer group shrink-0"
                                 title={assignment.isCompleted ? "未完了にする" : "完了にする"}
                               >
@@ -1118,6 +1129,7 @@ export default function App() {
                                       href={assignment.fileUrl}
                                       target="_blank"
                                       rel="noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
                                       className="inline-flex items-center gap-1 text-[9px] text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 hover:bg-indigo-100/70 border border-indigo-100 px-1.5 py-0.5 rounded transition-all"
                                     >
                                       <FileText className="h-2.5 w-2.5 text-indigo-500" />
@@ -1202,7 +1214,14 @@ export default function App() {
                           <div
                             key={assignment.id}
                             id={`todo-assignment-item-${assignment.id}`}
-                            className={`p-3.5 rounded-xl border border-l-[6px] transition-all flex flex-col gap-2 hover:scale-[1.01] ${
+                            onClick={() => {
+                              const courseObj = enrolledCoursesList.find(c => c.id === assignment.courseId) || courses.find(c => c.id === assignment.courseId) || assignment.course;
+                              setSelectedCourse(courseObj);
+                              setViewingAssignment(assignment);
+                              fetchSubmissions(assignment.id);
+                              setActiveTab("course-detail");
+                            }}
+                            className={`p-3.5 rounded-xl border border-l-[6px] transition-all flex flex-col gap-2 hover:scale-[1.01] cursor-pointer hover:shadow-md ${
                               assignment.isCompleted
                                 ? "opacity-65 hover:opacity-80 bg-slate-50/40"
                                 : "hover:shadow-xs"
@@ -1223,7 +1242,10 @@ export default function App() {
                           >
                             <div className="flex gap-2.5 items-start">
                               <button
-                                onClick={() => handleToggleAssignment(assignment.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleAssignment(assignment.id);
+                                }}
                                 className="mt-0.5 focus:outline-none cursor-pointer group shrink-0"
                                 title={assignment.isCompleted ? "未完了にする" : "完了にする"}
                               >
@@ -1271,6 +1293,7 @@ export default function App() {
                                       href={assignment.fileUrl}
                                       target="_blank"
                                       rel="noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
                                       className="inline-flex items-center gap-1 text-[9px] text-indigo-600 hover:text-indigo-800 font-bold bg-indigo-50 hover:bg-indigo-100/70 border border-indigo-100 px-1.5 py-0.5 rounded transition-all"
                                     >
                                       <FileText className="h-2.5 w-2.5 text-indigo-500" />
@@ -1371,6 +1394,7 @@ export default function App() {
                                 <div
                                   onClick={() => {
                                     setSelectedCourse(course);
+                                    setViewingAssignment(null);
                                     setActiveTab("course-detail");
                                     setCourseDetailTab("materials");
                                   }}
@@ -1828,6 +1852,7 @@ export default function App() {
                             <button
                               onClick={() => {
                                 setSelectedCourse(course);
+                                setViewingAssignment(null);
                                 setActiveTab("course-detail");
                                 setCourseDetailTab("materials");
                               }}
