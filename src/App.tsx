@@ -30,8 +30,11 @@ import {
   ArrowRight,
   Upload,
   Edit3,
-  ClipboardList
+  ClipboardList,
+  LogOut,
+  Lock
 } from "lucide-react";
+import LoginScreen from "./components/LoginScreen";
 
 // Types
 interface UserType {
@@ -39,6 +42,9 @@ interface UserType {
   name: string;
   email: string;
   role: "STUDENT" | "TEACHER";
+  password?: string;
+  passkeyPublicKey?: string;
+  passkeyCredentialId?: string;
 }
 
 interface LectureMaterialType {
@@ -256,6 +262,21 @@ export default function App() {
     };
   };
 
+  const handleSetCurrentUser = (user: UserType | null) => {
+    setCurrentUser(user);
+    if (user) {
+      localStorage.setItem("webpro_classroom_user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("webpro_classroom_user");
+    }
+  };
+
+  const handleLogout = () => {
+    handleSetCurrentUser(null);
+    setSelectedCourse(null);
+    showToast("ログアウトしました。");
+  };
+
   const showToast = (msg: string, isError = false) => {
     if (isError) {
       setErrorMsg(msg);
@@ -273,11 +294,21 @@ export default function App() {
       const data = await res.json();
       if (Array.isArray(data)) {
         setUsers(data);
-        if (data.length > 0) {
-          // Default to student Alice
-          const defaultUser = data.find((u: UserType) => u.id === "student-1") || data[0];
-          setCurrentUser(defaultUser);
+        // Load saved user from localStorage if it exists and matches
+        const savedUser = localStorage.getItem("webpro_classroom_user");
+        if (savedUser) {
+          try {
+            const parsed = JSON.parse(savedUser);
+            const matched = data.find((u: UserType) => u.email === parsed.email);
+            if (matched) {
+              setCurrentUser(matched);
+              return;
+            }
+          } catch (e) {
+            console.error("Failed to parse saved user:", e);
+          }
         }
+        setCurrentUser(null);
       } else {
         console.error("Failed to load users as array:", data);
         setUsers([]);
@@ -722,6 +753,17 @@ export default function App() {
 
   // Calculate stats
   const enrolledCoursesList = courses.filter((c) => c.isEnrolled);
+
+  if (!currentUser) {
+    return (
+      <LoginScreen
+        users={users}
+        onLoginSuccess={(user) => handleSetCurrentUser(user)}
+        onRegisterSuccess={(user) => handleSetCurrentUser(user)}
+        showToast={showToast}
+      />
+    );
+  }
   
   // 自分が閲覧可能な課題（公式課題 + 自分が作成した手動課題）に制限し、他生徒の手動課題を完全に排除
   const visibleAssignments = assignments.filter((a) => {
@@ -752,28 +794,30 @@ export default function App() {
             </div>
           </div>
 
-          {/* Role / User Switcher */}
-          <div className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-            <User className="h-4 w-4 text-indigo-400" />
-            <span className="text-xs text-slate-300 font-medium mr-1">現在のログイン:</span>
-            <select
-              id="user-selector"
-              value={currentUser?.id || ""}
-              onChange={(e) => {
-                const selected = users.find((u) => u.id === e.target.value);
-                if (selected) {
-                  setCurrentUser(selected);
-                  showToast(`${selected.name} に切り替えました。`);
-                }
-              }}
-              className="bg-slate-900 text-xs font-semibold text-white rounded px-2 py-1 outline-none border border-slate-700 cursor-pointer hover:border-indigo-500 transition-colors"
+          {/* Active User Session & Device Management */}
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3.5 bg-slate-800/60 border border-slate-700/60 p-2.5 rounded-xl backdrop-blur-xs">
+            {/* User profile details */}
+            <div className="flex items-center gap-2 px-1.5 py-0.5 mr-1 shrink-0">
+              <div className="bg-indigo-600/20 p-1.5 rounded-lg text-indigo-400">
+                <User className="h-4 w-4" />
+              </div>
+              <div className="text-left leading-tight">
+                <p className="text-xs font-extrabold text-slate-100">{currentUser.name}</p>
+                <p className="text-[10px] text-slate-400">
+                  {currentUser.role === "STUDENT" ? "学生" : "教員"} • {currentUser.email}
+                </p>
+              </div>
+            </div>
+
+            {/* Logout Button */}
+            <button
+              id="btn-logout"
+              onClick={handleLogout}
+              className="bg-slate-700 hover:bg-slate-650 text-slate-200 hover:text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 border border-slate-600/80 hover:border-slate-500/60 transition-all cursor-pointer"
             >
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} ({u.role === "STUDENT" ? "学生" : "教員"})
-                </option>
-              ))}
-            </select>
+              <LogOut className="h-3.5 w-3.5 text-slate-400" />
+              <span>ログアウト</span>
+            </button>
           </div>
         </div>
       </header>

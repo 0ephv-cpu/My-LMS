@@ -4,6 +4,7 @@ import { createServer as createViteServer } from "vite";
 import { PrismaClient } from "@prisma/client";
 import multer from "multer";
 import fs from "fs";
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -46,6 +47,7 @@ async function seedDatabase() {
       name: "アリス (学生)",
       email: "alice@example.com",
       role: "STUDENT",
+      password: "alice",
     },
   });
 
@@ -55,6 +57,17 @@ async function seedDatabase() {
       name: "ボブ (学生)",
       email: "bob@example.com",
       role: "STUDENT",
+      password: "bob",
+    },
+  });
+
+  const webproUser = await prisma.user.create({
+    data: {
+      id: "webpro-student",
+      name: "慶應 太郎 (学生)",
+      email: "webpro2026@keio.jp",
+      role: "STUDENT",
+      password: "webpro",
     },
   });
 
@@ -64,6 +77,7 @@ async function seedDatabase() {
       name: "佐藤教授 (教員)",
       email: "sato@example.com",
       role: "TEACHER",
+      password: "sato",
     },
   });
 
@@ -73,6 +87,7 @@ async function seedDatabase() {
       name: "山田教授 (教員)",
       email: "yamada@example.com",
       role: "TEACHER",
+      password: "yamada",
     },
   });
 
@@ -511,6 +526,61 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
   } catch (error) {
     console.error("Upload endpoint error:", error);
     res.status(500).json({ error: "ファイルのアップロードに失敗しました。" });
+  }
+});
+
+// --- AUTHENTICATION & DEVICE AUTH (PASSKEY) ENDPOINTS ---
+
+// POST /api/auth/register - Register a new user
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const { name, email, role, password } = req.body;
+    if (!name || !email || !role || !password) {
+      return res.status(400).json({ error: "すべての項目を入力してください。" });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: "このメールアドレスは既に登録されています。" });
+    }
+
+    // Generate a unique ID for the user
+    const id = "user-" + Math.random().toString(36).substr(2, 9);
+
+    const user = await prisma.user.create({
+      data: {
+        id,
+        name,
+        email,
+        role,
+        password,
+      },
+    });
+
+    res.json({ user });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ error: "ユーザー登録に失敗しました。" });
+  }
+});
+
+// POST /api/auth/login - Standard password login
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "メールアドレスとパスワードを入力してください。" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: "メールアドレスまたはパスワードが正しくありません。" });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "ログインに失敗しました。" });
   }
 });
 

@@ -8,13 +8,17 @@ generator client {
 }
 
 model User {
-  id          String       @id
-  name        String
-  email       String       @unique
-  role        String       // "STUDENT" or "TEACHER"
-  enrollments Enrollment[]
-  contacts    Contact[]
-  assignments Assignment[] // manual custom assignments created by this student
+  id                  String       @id
+  name                String
+  email               String       @unique
+  role                String       // "STUDENT" or "TEACHER"
+  password            String?      // Simple password for authentication
+  passkeyCredentialId String?      // WebAuthn/Device auth credential ID
+  passkeyPublicKey    String?      // WebAuthn/Device auth public key
+  passkeyCounter      Int?         // WebAuthn/Device auth counter
+  enrollments         Enrollment[]
+  contacts            Contact[]
+  assignments         Assignment[] // manual custom assignments created by this student
 }
 
 model Course {
