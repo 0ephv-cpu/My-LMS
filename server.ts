@@ -98,7 +98,7 @@ async function seedDatabase() {
       name: "認知科学基礎論",
       description: "人間の知の仕組みを、心理学、脳科学、人工知能の多角的なアプローチから探求します。認知バイアス、記憶、言語獲得、意思決定などの認知機能をモデル化して理解します。",
       syllabusUrl: "https://syllabus.univ.ac.jp/cognitive101",
-      classroom: "三田キャンパス 511教室",
+      classroom: "511教室",
       teacherContact: "sato@example.com (佐藤研究室)",
       teacherId: teacher.id,
       isOfficial: true,
@@ -109,37 +109,20 @@ async function seedDatabase() {
     },
   });
 
-  const econ = await prisma.course.create({
+  const webpro = await prisma.course.create({
     data: {
-      code: "ECONOMICS202",
-      name: "ミクロ経済学中級",
-      description: "市場における価格形成のメカニズムや企業・消費者の最適化行動、ゲーム理論の基礎を数理的に分析します。市場の失敗や外部性、情報の非対称性への理解を深めます。",
-      syllabusUrl: "https://syllabus.univ.ac.jp/econ202",
-      classroom: "日吉キャンパス J411教室",
+      code: "WEBPRO2026",
+      name: "Webプログラミング実践",
+      description: "React, TypeScript, Node.jsを用いたモダンなWebアプリケーション開発の実践。フロントエンドからバックエンドAPI構築まで一貫して習得します。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/webpro2026",
+      classroom: "J411",
       teacherContact: "sato@example.com (佐藤研究室)",
       teacherId: teacher.id,
       isOfficial: true,
-      dayOfWeek: "水",
+      dayOfWeek: "月",
       period: 3,
-      color: "#3b82f6", // Blue
+      color: "#6366f1", // Indigo
       teacherName: "佐藤教授",
-    },
-  });
-
-  const media = await prisma.course.create({
-    data: {
-      code: "MEDIA301",
-      name: "メディア・コミュニケーション論",
-      description: "マスメディアからソーシャルメディアに至るメディア環境の変遷と、それが個人の心理、社会構造、世論形成、文化価値観に与える影響を多角的なメディア理論から紐解きます。",
-      syllabusUrl: "https://syllabus.univ.ac.jp/media301",
-      classroom: "SFC アルファ館 201教室",
-      teacherContact: "yamada@example.com (山田研究室)",
-      teacherId: teacher2.id,
-      isOfficial: true,
-      dayOfWeek: "金",
-      period: 2,
-      color: "#ef4444", // Red
-      teacherName: "山田教授",
     },
   });
 
@@ -149,7 +132,7 @@ async function seedDatabase() {
       name: "人工知能と社会構造",
       description: "生成AIやディープラーニングなどの技術革新が、著作権、労働、法制度、倫理観に与える構造的な変化を考察します。技術的な限界をふまえた、望ましいAIガバナンスを議論します。",
       syllabusUrl: "https://syllabus.univ.ac.jp/ai401",
-      classroom: "三田キャンパス 421教室",
+      classroom: "421教室",
       teacherContact: "yamada@example.com (山田研究室)",
       teacherId: teacher2.id,
       isOfficial: true,
@@ -160,30 +143,13 @@ async function seedDatabase() {
     },
   });
 
-  const english = await prisma.course.create({
-    data: {
-      code: "ENGL401",
-      name: "学術英語ライティング",
-      description: "国際的な研究論文の執筆に必要なロジカルな文章構成力、適切なアカデミック語彙の選択、パラグラフの展開手法、および正確な引用形式のルールについて実践的に指導します。",
-      syllabusUrl: "https://syllabus.univ.ac.jp/engl401",
-      classroom: "日吉キャンパス D201教室",
-      teacherContact: "yamada@example.com (山田研究室)",
-      teacherId: teacher2.id,
-      isOfficial: true,
-      dayOfWeek: "木",
-      period: 4,
-      color: "#f59e0b", // Amber
-      teacherName: "山田教授",
-    },
-  });
-
   const math = await prisma.course.create({
     data: {
       code: "MATH101",
       name: "線形代数学基礎",
       description: "ベクトル空間、線形写像、行列式、固有値・固有ベクトルなど、現代科学技術の基盤となる線形代数の基本概念とその応用について体系的に学びます。",
       syllabusUrl: "https://syllabus.univ.ac.jp/math101",
-      classroom: "矢上キャンパス 12棟101教室",
+      classroom: "101教室",
       teacherContact: "sato@example.com (佐藤研究室)",
       teacherId: teacher.id,
       isOfficial: true,
@@ -194,13 +160,47 @@ async function seedDatabase() {
     },
   });
 
+  const econ = await prisma.course.create({
+    data: {
+      code: "ECONOMICS202",
+      name: "ミクロ経済学中級",
+      description: "市場における価格形成のメカニズムや企業・消費者の最適化行動、ゲーム理論の基礎を数理的に分析します。市場の失敗や外部性、情報の非対称性への理解を深めます。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/econ202",
+      classroom: "312教室",
+      teacherContact: "sato@example.com (佐藤研究室)",
+      teacherId: teacher.id,
+      isOfficial: true,
+      dayOfWeek: "水",
+      period: 2,
+      color: "#3b82f6", // Blue
+      teacherName: "佐藤教授",
+    },
+  });
+
+  const dataScience = await prisma.course.create({
+    data: {
+      code: "DATA301",
+      name: "データサイエンス入門",
+      description: "Python・統計解析・機械学習を用いたデータ駆動型の意思決定手法。回帰分析、分類モデル、可視化手法の実践的習得を目指します。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/data301",
+      classroom: "201PC教室",
+      teacherContact: "yamada@example.com (山田研究室)",
+      teacherId: teacher2.id,
+      isOfficial: true,
+      dayOfWeek: "水",
+      period: 4,
+      color: "#8b5cf6", // Purple
+      teacherName: "山田教授",
+    },
+  });
+
   const cs = await prisma.course.create({
     data: {
       code: "CS201",
       name: "データ構造とアルゴリズム",
       description: "計算機科学において極めて重要な配列、リスト、スタック、キュー、木構造、グラフなどのデータ構造と、ソート、探索、動的計画法などの主要なアルゴリズムの設計・解析手法を習得します。",
       syllabusUrl: "https://syllabus.univ.ac.jp/cs201",
-      classroom: "矢上キャンパス 14棟201教室",
+      classroom: "201教室",
       teacherContact: "yamada@example.com (山田研究室)",
       teacherId: teacher2.id,
       isOfficial: true,
@@ -211,17 +211,103 @@ async function seedDatabase() {
     },
   });
 
-  // Enrollments
+  const english = await prisma.course.create({
+    data: {
+      code: "ENGL401",
+      name: "学術英語ライティング",
+      description: "国際的な研究論文の執筆に必要なロジカルな文章構成力、適切なアカデミック語彙の選択、パラグラフの展開手法、および正確な引用形式のルールについて実践的に指導します。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/engl401",
+      classroom: "D201教室",
+      teacherContact: "yamada@example.com (山田研究室)",
+      teacherId: teacher2.id,
+      isOfficial: true,
+      dayOfWeek: "木",
+      period: 4,
+      color: "#f59e0b", // Amber
+      teacherName: "山田教授",
+    },
+  });
+
+  const media = await prisma.course.create({
+    data: {
+      code: "MEDIA301",
+      name: "メディア・コミュニケーション論",
+      description: "マスメディアからソーシャルメディアに至るメディア環境の変遷と、それが個人の心理、社会構造、世論形成、文化価値観に与える影響を多角的なメディア理論から紐解きます。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/media301",
+      classroom: "612教室",
+      teacherContact: "yamada@example.com (山田研究室)",
+      teacherId: teacher2.id,
+      isOfficial: true,
+      dayOfWeek: "金",
+      period: 2,
+      color: "#ef4444", // Red
+      teacherName: "山田教授",
+    },
+  });
+
+  const ethics = await prisma.course.create({
+    data: {
+      code: "PHIL101",
+      name: "現代社会と倫理",
+      description: "生命倫理、環境倫理、情報倫理、正義論など、多様な価値観が交錯する現代課題に対して論理的かつ批判的な思考プロセスを養います。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/phil101",
+      classroom: "102教室",
+      teacherContact: "sato@example.com (佐藤研究室)",
+      teacherId: teacher.id,
+      isOfficial: true,
+      dayOfWeek: "金",
+      period: 4,
+      color: "#14b8a6", // Teal
+      teacherName: "佐藤教授",
+    },
+  });
+
+  const design = await prisma.course.create({
+    data: {
+      code: "DESIGN101",
+      name: "UI/UXデザイン演習",
+      description: "ユーザーリサーチ、ワイヤーフレーム構築、プロトタイピング、アクセシビリティ評価を通じ、直感的で魅力的なプロダクトデザイン手法をマスターします。",
+      syllabusUrl: "https://syllabus.univ.ac.jp/design101",
+      classroom: "スタジオA",
+      teacherContact: "sato@example.com (佐藤研究室)",
+      teacherId: teacher.id,
+      isOfficial: true,
+      dayOfWeek: "土",
+      period: 2,
+      color: "#ec4899", // Pink
+      teacherName: "佐藤教授",
+    },
+  });
+
+  // Enrollments (Register for webproUser, Alice, Bob)
   await prisma.enrollment.createMany({
     data: [
+      // webproUser (慶應 太郎) enrollments
+      { userId: webproUser.id, courseId: cognitive.id },
+      { userId: webproUser.id, courseId: webpro.id },
+      { userId: webproUser.id, courseId: aiSocial.id },
+      { userId: webproUser.id, courseId: math.id },
+      { userId: webproUser.id, courseId: econ.id },
+      { userId: webproUser.id, courseId: dataScience.id },
+      { userId: webproUser.id, courseId: cs.id },
+      { userId: webproUser.id, courseId: english.id },
+      { userId: webproUser.id, courseId: media.id },
+      { userId: webproUser.id, courseId: ethics.id },
+      { userId: webproUser.id, courseId: design.id },
+
+      // Alice enrollments
       { userId: alice.id, courseId: cognitive.id },
+      { userId: alice.id, courseId: webpro.id },
       { userId: alice.id, courseId: econ.id },
       { userId: alice.id, courseId: aiSocial.id },
       { userId: alice.id, courseId: math.id },
+
+      // Bob enrollments
       { userId: bob.id, courseId: cognitive.id },
       { userId: bob.id, courseId: media.id },
       { userId: bob.id, courseId: english.id },
       { userId: bob.id, courseId: cs.id },
+      { userId: bob.id, courseId: design.id },
     ],
   });
 

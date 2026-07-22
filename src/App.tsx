@@ -1619,18 +1619,17 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  /* Mobile Scrollable All-Days Grid Mode */
+                  /* Mobile Auto-Fit All-Days Grid Mode (Fits exactly within device screen width) */
                   <div>
-                    <div className="text-center text-xs text-slate-400 mb-2 font-medium">
-                      ↔ 左右にスワイプして全曜日を確認できます
-                    </div>
-                    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-                      <table className="w-full min-w-[650px] border-collapse text-center">
+                    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+                      <table className="w-full table-fixed border-collapse text-center">
                         <thead>
                           <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                            <th className="py-2.5 px-2 text-xs font-bold w-[70px] border-r border-slate-100">時限</th>
+                            <th className="py-2 px-1 text-[10px] sm:text-xs font-bold w-[36px] sm:w-[48px] border-r border-slate-200 bg-slate-100/60">
+                              時限
+                            </th>
                             {["月", "火", "水", "木", "金", "土"].map((day) => (
-                              <th key={day} className="py-2.5 px-2 text-xs font-bold border-r border-slate-100 last:border-r-0">
+                              <th key={day} className="py-2 px-0.5 text-xs font-extrabold border-r border-slate-200 last:border-r-0">
                                 {day}
                               </th>
                             ))}
@@ -1639,7 +1638,7 @@ export default function App() {
                         <tbody>
                           {["1", "2", "3", "4", "5", "6", "7"].map((period) => (
                             <tr key={period} className="border-b border-slate-100 last:border-b-0">
-                              <td className="py-3 px-2 font-bold text-xs text-slate-700 bg-slate-50/50 border-r border-slate-200">
+                              <td className="py-2 px-0.5 font-bold text-[10px] sm:text-xs text-slate-700 bg-slate-50/70 border-r border-slate-200 text-center">
                                 {period}限
                               </td>
                               {["月", "火", "水", "木", "金", "土"].map((day) => {
@@ -1649,7 +1648,7 @@ export default function App() {
                                 const themeColor = course?.color || "#4f46e5";
 
                                 return (
-                                  <td key={day} className="p-1 border-r border-slate-100 last:border-r-0 align-top h-[75px]">
+                                  <td key={day} className="p-0.5 sm:p-1 border-r border-slate-100 last:border-r-0 align-top h-[76px] sm:h-[90px]">
                                     {course ? (
                                       <div
                                         onClick={() => {
@@ -1658,18 +1657,18 @@ export default function App() {
                                           setActiveTab("course-detail");
                                           setCourseDetailTab("materials");
                                         }}
-                                        className="p-1.5 rounded-lg border-l-2 text-left cursor-pointer h-full border flex flex-col justify-between"
+                                        className="p-1 rounded-md border-l-2 text-left cursor-pointer h-full border flex flex-col justify-between transition-all hover:opacity-90 active:scale-[0.98] overflow-hidden"
                                         style={{
                                           borderLeftColor: themeColor,
-                                          borderColor: `${themeColor}20`,
-                                          backgroundColor: `${themeColor}08`,
+                                          borderColor: `${themeColor}30`,
+                                          backgroundColor: `${themeColor}12`,
                                         }}
                                       >
-                                        <p className="font-bold text-[11px] text-slate-800 line-clamp-2 leading-tight">
+                                        <p className="font-extrabold text-[9px] sm:text-[10px] text-slate-900 line-clamp-2 leading-tight break-all">
                                           {course.name}
                                         </p>
-                                        <span className="text-[9px] text-slate-400 block truncate">
-                                          {course.classroom || "教室未定"}
+                                        <span className="text-[8px] font-bold text-slate-600 block truncate mt-0.5">
+                                          📍 {course.classroom || "未定"}
                                         </span>
                                       </div>
                                     ) : (
@@ -1680,9 +1679,9 @@ export default function App() {
                                           setSearchQuery("");
                                           setActiveTab("courses");
                                         }}
-                                        className="h-full border border-dashed border-slate-150 rounded-lg flex items-center justify-center p-1 text-slate-300 hover:border-indigo-300 cursor-pointer"
+                                        className="h-full border border-dashed border-slate-200 rounded-md flex items-center justify-center p-0.5 text-slate-300 hover:border-indigo-300 hover:bg-indigo-50/30 cursor-pointer transition-colors"
                                       >
-                                        <Plus className="h-3.5 w-3.5 text-slate-300" />
+                                        <Plus className="h-3 w-3 text-slate-300" />
                                       </div>
                                     )}
                                   </td>
@@ -1697,14 +1696,16 @@ export default function App() {
                 )}
               </div>
 
-              {/* ===== DESKTOP TIMETABLE VIEW (hidden md:block) ===== */}
-              <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
-                <table className="w-full border-collapse bg-white text-center">
+              {/* ===== DESKTOP TIMETABLE VIEW (hidden md:block, Responsive Table-Fixed) ===== */}
+              <div className="hidden md:block rounded-xl border border-slate-200 overflow-hidden bg-white shadow-xs">
+                <table className="w-full table-fixed border-collapse bg-white text-center">
                   <thead>
                     <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
-                      <th className="py-3 px-4 text-xs font-bold w-[100px] border-r border-slate-100">時限</th>
+                      <th className="py-3 px-2 text-xs font-bold w-[70px] lg:w-[90px] border-r border-slate-200 bg-slate-100/50">
+                        時限
+                      </th>
                       {["月", "火", "水", "木", "金", "土"].map((day) => (
-                        <th key={day} className="py-3 px-4 text-xs font-bold border-r border-slate-100 last:border-r-0">
+                        <th key={day} className="py-3 px-2 text-xs font-bold border-r border-slate-200 last:border-r-0">
                           {day}曜日
                         </th>
                       ))}
@@ -1713,15 +1714,15 @@ export default function App() {
                   <tbody>
                     {["1", "2", "3", "4", "5", "6", "7"].map((period) => (
                       <tr key={period} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/30 transition-colors">
-                        <td className="py-5 px-4 font-bold text-sm text-slate-500 bg-slate-50/50 border-r border-slate-200">
-                          <div className="text-sm font-extrabold text-slate-800">{period}限</div>
+                        <td className="py-3 px-2 font-bold text-xs text-slate-500 bg-slate-50/50 border-r border-slate-200 text-center">
+                          <div className="text-xs font-extrabold text-slate-800">{period}限</div>
                           <div className="text-[10px] text-slate-400 font-normal mt-0.5">
-                            {period === "1" ? "09:00~10:30" : 
-                             period === "2" ? "10:45~12:15" : 
-                             period === "3" ? "13:00~14:30" : 
-                             period === "4" ? "14:45~16:15" : 
-                             period === "5" ? "16:30~18:00" : 
-                             period === "6" ? "18:10~19:40" : "19:50~21:20"}
+                            {period === "1" ? "09:00~" : 
+                             period === "2" ? "10:45~" : 
+                             period === "3" ? "13:00~" : 
+                             period === "4" ? "14:45~" : 
+                             period === "5" ? "16:30~" : 
+                             period === "6" ? "18:10~" : "19:50~"}
                           </div>
                         </td>
                         {["月", "火", "水", "木", "金", "土"].map((day) => {
@@ -1731,7 +1732,7 @@ export default function App() {
                           const themeColor = course?.color || "#4f46e5";
 
                           return (
-                            <td key={day} className="p-2 border-r border-slate-100 last:border-r-0 align-stretch min-h-[100px]">
+                            <td key={day} className="p-1 sm:p-1.5 border-r border-slate-100 last:border-r-0 align-stretch min-h-[118px]">
                               {course ? (
                                 <div
                                   onClick={() => {
@@ -1740,7 +1741,7 @@ export default function App() {
                                     setActiveTab("course-detail");
                                     setCourseDetailTab("materials");
                                   }}
-                                  className="group p-3 rounded-lg border-l-4 text-left cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-sm flex flex-col justify-between h-full min-h-[85px] border relative pr-7"
+                                  className="group p-2 sm:p-2.5 rounded-lg border-l-3 text-left cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-sm flex flex-col justify-between h-full min-h-[98px] border relative pr-6 overflow-hidden"
                                   style={{ 
                                     borderLeftColor: themeColor, 
                                     borderColor: `${themeColor}20`,
@@ -3423,7 +3424,7 @@ export default function App() {
                   <label className="block text-xs font-bold text-slate-500 mb-1">教室 / 会場</label>
                   <input
                     type="text"
-                    placeholder="例: 3号館 301講義室"
+                    placeholder="例: 511教室 / J411"
                     value={newCourse.classroom}
                     onChange={(e) => setNewCourse((prev) => ({ ...prev, classroom: e.target.value }))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-indigo-500"
