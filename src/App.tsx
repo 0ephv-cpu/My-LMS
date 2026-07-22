@@ -139,6 +139,14 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "timetable" | "courses" | "tools" | "course-detail">("dashboard");
   const [courseDetailTab, setCourseDetailTab] = useState<"info" | "materials" | "chat" | "contact">("materials");
   
+  // Mobile Timetable States
+  const [mobileTimetableDay, setMobileTimetableDay] = useState<string>(() => {
+    const days = ["日", "月", "火", "水", "木", "金", "土"];
+    const today = days[new Date().getDay()];
+    return (today === "日" || today === "土") ? "月" : today;
+  });
+  const [mobileTimetableMode, setMobileTimetableMode] = useState<"day" | "all">("day");
+  
   // Assignment View & Submission States
   const [viewingAssignment, setViewingAssignment] = useState<AssignmentType | null>(null);
   const [assignmentSubmissions, setAssignmentSubmissions] = useState<any[]>([]);
@@ -781,42 +789,36 @@ export default function App() {
 
   return (
     <div id="app-root" className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
-      {/* Top Banner / Header */}
-      <header id="app-header" className="sticky top-0 z-40 bg-slate-900 text-white shadow-md border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-600 p-2 rounded-lg text-white shadow-inner">
-              <GraduationCap className="h-6 w-6" />
+      {/* Top Banner / Header (Minimal Compact) */}
+      <header id="app-header" className="sticky top-0 z-40 bg-slate-900 text-white shadow-xs border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-3 py-1.5 sm:py-2 flex items-center justify-between gap-2">
+          {/* Minimal Brand */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="bg-indigo-600 p-1.5 rounded-lg text-white">
+              <GraduationCap className="h-4 w-4" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">LMS Prototype</h1>
-              <p className="text-xs text-slate-400">次世代学習管理・課題共有システム</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-white">LMS Prototype</span>
+              <span className="hidden md:inline text-[10px] text-slate-400 font-normal">次世代学習管理・課題共有システム</span>
             </div>
           </div>
 
-          {/* Active User Session & Device Management */}
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3.5 bg-slate-800/60 border border-slate-700/60 p-2.5 rounded-xl backdrop-blur-xs">
-            {/* User profile details */}
-            <div className="flex items-center gap-2 px-1.5 py-0.5 mr-1 shrink-0">
-              <div className="bg-indigo-600/20 p-1.5 rounded-lg text-indigo-400">
-                <User className="h-4 w-4" />
-              </div>
-              <div className="text-left leading-tight">
-                <p className="text-xs font-extrabold text-slate-100">{currentUser.name}</p>
-                <p className="text-[10px] text-slate-400">
-                  {currentUser.role === "STUDENT" ? "学生" : "教員"} • {currentUser.email}
-                </p>
-              </div>
+          {/* User Session */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/80 px-2.5 py-1 rounded-lg text-xs">
+              <User className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+              <span className="font-bold text-slate-100 text-xs max-w-[100px] sm:max-w-none truncate">{currentUser.name}</span>
+              <span className="hidden sm:inline text-[10px] text-slate-400">({currentUser.role === "STUDENT" ? "学生" : "教員"})</span>
             </div>
 
-            {/* Logout Button */}
             <button
               id="btn-logout"
               onClick={handleLogout}
-              className="bg-slate-700 hover:bg-slate-650 text-slate-200 hover:text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 border border-slate-600/80 hover:border-slate-500/60 transition-all cursor-pointer"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 border border-slate-700 transition-all cursor-pointer"
+              title="ログアウト"
             >
               <LogOut className="h-3.5 w-3.5 text-slate-400" />
-              <span>ログアウト</span>
+              <span className="hidden sm:inline">ログアウト</span>
             </button>
           </div>
         </div>
@@ -853,68 +855,74 @@ export default function App() {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Navigation Tabs */}
-        <div id="nav-tabs" className="flex border-b border-slate-200 mb-6 overflow-x-auto gap-1">
+        {/* Navigation Tabs (Mobile Optimized & Compact) */}
+        <div id="nav-tabs" className="flex border-b border-slate-200 mb-6 overflow-x-auto scrollbar-none gap-1 sm:gap-1.5 scroll-smooth">
           <button
             id="tab-dashboard"
             onClick={() => setActiveTab("dashboard")}
-            className={`py-2.5 px-4 font-semibold text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-2 ${
+            className={`py-2 sm:py-2.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === "dashboard"
-                ? "border-indigo-600 text-indigo-600 font-bold"
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-lg"
                 : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
             }`}
           >
-            <GraduationCap className="h-4.5 w-4.5" />
-            <span>マイダッシュボード</span>
+            <GraduationCap className="h-4 w-4 sm:h-4.5 sm:w-4.5 shrink-0" />
+            <span className="hidden sm:inline">マイダッシュボード</span>
+            <span className="sm:hidden">ダッシュボード</span>
           </button>
           <button
             id="tab-timetable"
             onClick={() => setActiveTab("timetable")}
-            className={`py-2.5 px-4 font-semibold text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-2 ${
+            className={`py-2 sm:py-2.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === "timetable"
-                ? "border-indigo-600 text-indigo-600 font-bold"
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-lg"
                 : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
             }`}
           >
-            <Calendar className="h-4.5 w-4.5" />
+            <Calendar className="h-4 w-4 sm:h-4.5 sm:w-4.5 shrink-0" />
             <span>時間割</span>
           </button>
           <button
             id="tab-courses"
             onClick={() => setActiveTab("courses")}
-            className={`py-2.5 px-4 font-semibold text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-2 ${
+            className={`py-2 sm:py-2.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === "courses"
-                ? "border-indigo-600 text-indigo-600 font-bold"
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-lg"
                 : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
             }`}
           >
-            <BookOpen className="h-4.5 w-4.5" />
-            <span>{currentUser?.role === "TEACHER" ? "授業登録" : "履修登録"} ({courses.length})</span>
+            <BookOpen className="h-4 w-4 sm:h-4.5 sm:w-4.5 shrink-0" />
+            <span className="hidden sm:inline">{currentUser?.role === "TEACHER" ? "授業登録" : "履修登録"} ({courses.length})</span>
+            <span className="sm:hidden">{currentUser?.role === "TEACHER" ? "授業" : "履修"} ({courses.length})</span>
           </button>
           <button
             id="tab-tools"
             onClick={() => setActiveTab("tools")}
-            className={`py-2.5 px-4 font-semibold text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-2 ${
+            className={`py-2 sm:py-2.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-1.5 cursor-pointer ${
               activeTab === "tools"
-                ? "border-indigo-600 text-indigo-600 font-bold"
+                ? "border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-lg"
                 : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
             }`}
           >
-            <Bookmark className="h-4.5 w-4.5" />
-            <span>便利ツール</span>
+            <Bookmark className="h-4 w-4 sm:h-4.5 sm:w-4.5 shrink-0" />
+            <span className="hidden sm:inline">便利ツール</span>
+            <span className="sm:hidden">ツール</span>
           </button>
           {selectedCourse && (
             <button
               id="tab-detail"
               onClick={() => setActiveTab("course-detail")}
-              className="py-2.5 px-4 font-semibold text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-2"
+              className={`py-2 sm:py-2.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm transition-all duration-150 border-b-2 shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "course-detail" ? "rounded-t-lg bg-slate-50" : ""
+              }`}
               style={{
                 borderColor: activeTab === "course-detail" ? (selectedCourse.color || "#4f46e5") : "transparent",
                 color: activeTab === "course-detail" ? (selectedCourse.color || "#4f46e5") : "rgb(100 116 139)"
               }}
             >
-              <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0 animate-pulse" style={{ backgroundColor: selectedCourse.color || "#4f46e5" }}></span>
-              <span className={activeTab === "course-detail" ? "font-extrabold" : ""}>{selectedCourse.code}: {selectedCourse.name}</span>
+              <span className="w-2 h-2 rounded-full inline-block shrink-0 animate-pulse" style={{ backgroundColor: selectedCourse.color || "#4f46e5" }}></span>
+              <span className="hidden sm:inline">{selectedCourse.code}: {selectedCourse.name}</span>
+              <span className="sm:hidden max-w-[120px] truncate">{selectedCourse.code}</span>
             </button>
           )}
         </div>
@@ -1376,10 +1384,10 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab: Timetable (時間割) */}
+        {/* Tab: Timetable (時間割 - スマホ最適化対応) */}
         {activeTab === "timetable" && (
           <div id="timetable-view" className="space-y-6">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-100">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -1387,21 +1395,311 @@ export default function App() {
                     学期履修時間割
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    あなたが履修登録している授業（曜日・時限）が自動的に時間割に配置されます。授業をクリックすると詳細ページへジャンプします。
+                    履修登録している授業が自動配置されます。タップして授業詳細へ移動できます。
                   </p>
                 </div>
-                <button
-                  onClick={() => setActiveTab("courses")}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg inline-flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer shrink-0"
-                >
-                  <Plus className="h-4 w-4" />
-                  授業を追加して時間割を埋める
-                </button>
+                
+                <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+                  {/* Mobile Mode Switcher */}
+                  <div className="flex md:hidden bg-slate-100 p-1 rounded-lg text-xs font-bold w-full sm:w-auto">
+                    <button
+                      onClick={() => setMobileTimetableMode("day")}
+                      className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                        mobileTimetableMode === "day"
+                          ? "bg-white text-indigo-600 shadow-xs"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      曜日別表示
+                    </button>
+                    <button
+                      onClick={() => setMobileTimetableMode("all")}
+                      className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                        mobileTimetableMode === "all"
+                          ? "bg-white text-indigo-600 shadow-xs"
+                          : "text-slate-500 hover:text-slate-800"
+                      }`}
+                    >
+                      全曜日表
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveTab("courses")}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg inline-flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer w-full sm:w-auto shrink-0"
+                  >
+                    <Plus className="h-4 w-4" />
+                    授業を追加して時間割を埋める
+                  </button>
+                </div>
               </div>
 
-              {/* Responsive Timetable Grid */}
-              <div className="overflow-x-auto rounded-xl border border-slate-200">
-                <table className="w-full min-w-[800px] border-collapse bg-white text-center">
+              {/* ===== MOBILE TIMETABLE VIEW (md:hidden) ===== */}
+              <div className="block md:hidden">
+                {mobileTimetableMode === "day" ? (
+                  <div className="space-y-4">
+                    {/* Day Selection Pills */}
+                    <div className="grid grid-cols-6 gap-1 bg-slate-100 p-1 rounded-xl">
+                      {["月", "火", "水", "木", "金", "土"].map((day) => {
+                        const days = ["日", "月", "火", "水", "木", "金", "土"];
+                        const isToday = days[new Date().getDay()] === day;
+                        const isSelected = mobileTimetableDay === day;
+
+                        return (
+                          <button
+                            key={day}
+                            onClick={() => setMobileTimetableDay(day)}
+                            className={`py-2 rounded-lg text-xs font-extrabold transition-all relative flex flex-col items-center justify-center cursor-pointer ${
+                              isSelected
+                                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                                : "text-slate-600 hover:bg-slate-200/60"
+                            }`}
+                          >
+                            <span>{day}</span>
+                            {isToday && (
+                              <span
+                                className={`text-[9px] font-normal leading-none mt-0.5 ${
+                                  isSelected ? "text-indigo-200" : "text-indigo-600 font-bold"
+                                }`}
+                              >
+                                今日
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Periods Cards for Selected Day */}
+                    <div className="space-y-3">
+                      {["1", "2", "3", "4", "5", "6", "7"].map((period) => {
+                        const course = enrolledCoursesList.find(
+                          (c) => c.dayOfWeek === mobileTimetableDay && String(c.period) === period
+                        );
+                        const themeColor = course?.color || "#4f46e5";
+                        const timeStr = 
+                          period === "1" ? "09:00 - 10:30" : 
+                          period === "2" ? "10:45 - 12:15" : 
+                          period === "3" ? "13:00 - 14:30" : 
+                          period === "4" ? "14:45 - 16:15" : 
+                          period === "5" ? "16:30 - 18:00" : 
+                          period === "6" ? "18:10 - 19:40" : "19:50 - 21:20";
+
+                        return (
+                          <div
+                            key={period}
+                            className="bg-slate-50/70 border border-slate-200 rounded-xl p-3.5 flex flex-col gap-2.5 transition-all"
+                          >
+                            {/* Period Header */}
+                            <div className="flex items-center justify-between text-xs pb-1.5 border-b border-slate-200/60">
+                              <span className="font-extrabold text-slate-800 bg-slate-200/80 px-2 py-0.5 rounded text-xs">
+                                {period}限
+                              </span>
+                              <span className="text-[11px] font-medium text-slate-500 font-mono">
+                                {timeStr}
+                              </span>
+                            </div>
+
+                            {/* Course Item or Empty Slot */}
+                            {course ? (
+                              <div
+                                onClick={() => {
+                                  setSelectedCourse(course);
+                                  setViewingAssignment(null);
+                                  setActiveTab("course-detail");
+                                  setCourseDetailTab("materials");
+                                }}
+                                className="p-3.5 rounded-xl border-l-4 text-left cursor-pointer transition-all hover:shadow-md border relative bg-white"
+                                style={{
+                                  borderLeftColor: themeColor,
+                                  borderColor: `${themeColor}30`,
+                                }}
+                              >
+                                {/* Course Menu Dropdown */}
+                                <div className="absolute top-2.5 right-2 z-10">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveMenuCourseId(activeMenuCourseId === course.id ? null : course.id);
+                                    }}
+                                    className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                                    title="メニューを開く"
+                                  >
+                                    <MoreVertical className="h-4 w-4" />
+                                  </button>
+                                  {activeMenuCourseId === course.id && (
+                                    <div
+                                      className="absolute right-0 mt-1 w-40 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-20 text-xs text-slate-700"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {course.syllabusUrl ? (
+                                        <a
+                                          href={course.syllabusUrl}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 transition-colors font-medium text-slate-700"
+                                          onClick={() => setActiveMenuCourseId(null)}
+                                        >
+                                          <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
+                                          <span>シラバスを見る</span>
+                                        </a>
+                                      ) : (
+                                        <button
+                                          onClick={() => {
+                                            showToast("シラバスのリンクが登録されていません。", true);
+                                            setActiveMenuCourseId(null);
+                                          }}
+                                          className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-slate-50 transition-colors font-medium text-slate-400 cursor-not-allowed"
+                                        >
+                                          <ExternalLink className="h-3.5 w-3.5 text-slate-300" />
+                                          <span>シラバス未登録</span>
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => {
+                                          setActiveMenuCourseId(null);
+                                          handleUnenroll(course.id);
+                                        }}
+                                        className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-red-600 transition-colors font-bold border-t border-slate-100 cursor-pointer"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                        <span>履修登録を解除</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="space-y-1.5 pr-6">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span
+                                      className="text-[10px] font-extrabold font-mono px-1.5 py-0.5 rounded text-white"
+                                      style={{ backgroundColor: themeColor }}
+                                    >
+                                      {course.code}
+                                    </span>
+                                    {course.isOfficial ? (
+                                      <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded border border-blue-100">
+                                        公式
+                                      </span>
+                                    ) : (
+                                      <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded border border-slate-200">
+                                        生徒
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <h4 className="font-extrabold text-slate-900 text-sm leading-snug">
+                                    {course.name}
+                                  </h4>
+
+                                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
+                                    <span>📍 {course.classroom || "教室未定"}</span>
+                                    <span>👤 {course.teacherName || "教員未定"}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setFilterDayOfWeek(mobileTimetableDay);
+                                  setFilterPeriod(Number(period));
+                                  setSearchQuery("");
+                                  setActiveTab("courses");
+                                  showToast(`${mobileTimetableDay}曜${period}限の授業を検索します！`);
+                                }}
+                                className="w-full py-3 border border-dashed border-slate-300 rounded-xl bg-white flex items-center justify-center gap-2 text-slate-400 hover:text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer text-xs font-bold"
+                              >
+                                <Plus className="h-4 w-4 text-slate-400" />
+                                <span>空きコマ（タップして授業を登録）</span>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  /* Mobile Scrollable All-Days Grid Mode */
+                  <div>
+                    <div className="text-center text-xs text-slate-400 mb-2 font-medium">
+                      ↔ 左右にスワイプして全曜日を確認できます
+                    </div>
+                    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                      <table className="w-full min-w-[650px] border-collapse text-center">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                            <th className="py-2.5 px-2 text-xs font-bold w-[70px] border-r border-slate-100">時限</th>
+                            {["月", "火", "水", "木", "金", "土"].map((day) => (
+                              <th key={day} className="py-2.5 px-2 text-xs font-bold border-r border-slate-100 last:border-r-0">
+                                {day}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {["1", "2", "3", "4", "5", "6", "7"].map((period) => (
+                            <tr key={period} className="border-b border-slate-100 last:border-b-0">
+                              <td className="py-3 px-2 font-bold text-xs text-slate-700 bg-slate-50/50 border-r border-slate-200">
+                                {period}限
+                              </td>
+                              {["月", "火", "水", "木", "金", "土"].map((day) => {
+                                const course = enrolledCoursesList.find(
+                                  (c) => c.dayOfWeek === day && String(c.period) === period
+                                );
+                                const themeColor = course?.color || "#4f46e5";
+
+                                return (
+                                  <td key={day} className="p-1 border-r border-slate-100 last:border-r-0 align-top h-[75px]">
+                                    {course ? (
+                                      <div
+                                        onClick={() => {
+                                          setSelectedCourse(course);
+                                          setViewingAssignment(null);
+                                          setActiveTab("course-detail");
+                                          setCourseDetailTab("materials");
+                                        }}
+                                        className="p-1.5 rounded-lg border-l-2 text-left cursor-pointer h-full border flex flex-col justify-between"
+                                        style={{
+                                          borderLeftColor: themeColor,
+                                          borderColor: `${themeColor}20`,
+                                          backgroundColor: `${themeColor}08`,
+                                        }}
+                                      >
+                                        <p className="font-bold text-[11px] text-slate-800 line-clamp-2 leading-tight">
+                                          {course.name}
+                                        </p>
+                                        <span className="text-[9px] text-slate-400 block truncate">
+                                          {course.classroom || "教室未定"}
+                                        </span>
+                                      </div>
+                                    ) : (
+                                      <div
+                                        onClick={() => {
+                                          setFilterDayOfWeek(day);
+                                          setFilterPeriod(Number(period));
+                                          setSearchQuery("");
+                                          setActiveTab("courses");
+                                        }}
+                                        className="h-full border border-dashed border-slate-150 rounded-lg flex items-center justify-center p-1 text-slate-300 hover:border-indigo-300 cursor-pointer"
+                                      >
+                                        <Plus className="h-3.5 w-3.5 text-slate-300" />
+                                      </div>
+                                    )}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* ===== DESKTOP TIMETABLE VIEW (hidden md:block) ===== */}
+              <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200">
+                <table className="w-full border-collapse bg-white text-center">
                   <thead>
                     <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
                       <th className="py-3 px-4 text-xs font-bold w-[100px] border-r border-slate-100">時限</th>
